@@ -1,6 +1,7 @@
 package com.app.omdbmovieapp.data.repository
 
 import com.app.omdbmovieapp.data.remote.RetrofitClient.apiService
+import com.app.omdbmovieapp.domain.model.MovieDetailsResponseDto
 import com.app.omdbmovieapp.domain.model.MovieResponseDto
 import javax.inject.Inject
 
@@ -13,7 +14,7 @@ class MyRepository @Inject constructor() {
     suspend fun getMovieDetails(
         movieId: String,
         apiKey: String
-    ): MovieResponseDto.MovieDetailsResponse {
+    ): MovieDetailsResponseDto {
         return apiService.getMovieDetails(movieId, apiKey)
     }
 }
