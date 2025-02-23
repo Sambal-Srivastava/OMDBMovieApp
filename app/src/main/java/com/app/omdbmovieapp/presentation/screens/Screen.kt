@@ -12,5 +12,4 @@ sealed class Screen {
 
     @Serializable
     object MovieRegistartion : Screen()
-
 }

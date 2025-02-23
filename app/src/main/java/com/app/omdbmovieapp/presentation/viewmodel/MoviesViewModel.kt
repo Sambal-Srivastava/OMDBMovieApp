@@ -5,9 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.omdbmovieapp.domain.model.MovieDetailsResponseDto
+import com.app.omdbmovieapp.domain.model.MovieEntity
 import com.app.omdbmovieapp.domain.model.MovieResponseDto
 import com.app.omdbmovieapp.domain.usecase.FetchMoviesUseCase
+import com.app.omdbmovieapp.domain.usecase.GetLocalMovieByIdUseCase
+import com.app.omdbmovieapp.domain.usecase.GetLocalMoviesUseCase
 import com.app.omdbmovieapp.domain.usecase.MovieDetailsUseCase
+import com.app.omdbmovieapp.domain.usecase.RegisterMovieUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
     private val fetchMoviesUseCase: FetchMoviesUseCase,
-    private val movieDetailsUseCase: MovieDetailsUseCase
+    private val movieDetailsUseCase: MovieDetailsUseCase,
+    private val registerMovieUseCase: RegisterMovieUseCase,
+    private val getLocalMoviesUseCase: GetLocalMoviesUseCase,
+    private val getLocalMovieByIdUseCase: GetLocalMovieByIdUseCase
 ) : ViewModel() {
 
     private val _movies = MutableStateFlow<MovieResponseDto.MockResponse?>(null)
@@ -25,6 +32,12 @@ class MoviesViewModel @Inject constructor(
 
     private val _movieDetails = MutableStateFlow<MovieDetailsResponseDto?>(null)
     val movieDetails: StateFlow<MovieDetailsResponseDto?> = _movieDetails
+
+    private val _localMovies = MutableStateFlow<List<MovieEntity>>(emptyList())
+    val localMovies: StateFlow<List<MovieEntity>> = _localMovies
+
+    private val _localMovieDetail = MutableStateFlow<MovieEntity?>(null)
+    val localMovieDetail: StateFlow<MovieEntity?> = _localMovieDetail
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -52,6 +65,36 @@ class MoviesViewModel @Inject constructor(
             } finally {
                 _isLoading.value = false  // Hide progress bar
             }
+        }
+    }
+
+    //local data work
+    fun fetchLocalMovies() {
+        viewModelScope.launch { _localMovies.value = getLocalMoviesUseCase() }
+    }
+
+    fun fetchLocalMovieDetail(id: String) {
+        viewModelScope.launch {
+            val numericId = id.toIntOrNull()
+            _localMovieDetail.value =
+                if (numericId != null) getLocalMovieByIdUseCase(numericId) else null
+        }
+    }
+
+    fun registerMovie(
+        title: String,
+        director: String,
+        genre: String,
+        year: String,
+        rating: String
+    ) {
+        viewModelScope.launch {
+            val movie = MovieEntity(
+                title = title, director = director, genre = genre,
+                year = year.toInt(), imdbRating = rating.toFloat()
+            )
+            registerMovieUseCase(movie)
+            fetchLocalMovies()
         }
     }
 }

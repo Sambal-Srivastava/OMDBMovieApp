@@ -19,29 +19,40 @@ import com.app.omdbmovieapp.presentation.viewmodel.MoviesViewModel
 @Composable
 fun MovieDetailScreen(navController: NavController, moviesId: String) {
     var viewModel: MoviesViewModel = hiltViewModel()
+    var isLocal = false
     LaunchedEffect(key1 = moviesId) {
+        val numericId = moviesId.toIntOrNull()
+        if (numericId != null) {
+            isLocal = true
+            viewModel.fetchLocalMovieDetail(moviesId)
+        } else {
+            isLocal = false
+            viewModel.fetchMovieDetails(movieId = moviesId, apiKey = BuildConfig.API_KEY)
+        }
         moviesId.let {
-            viewModel.fetchMovieDetails(movieId = it, apiKey = BuildConfig.API_KEY)
         }
     }
 
     //observe movie details
     val movieDetails by viewModel.movieDetails.collectAsState()
+    val localMovieDetails by viewModel.localMovieDetail.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 48.dp, start = 16.dp, end = 16.dp)
     ) {
-        AsyncImage(
-            model = movieDetails?.poster,
-            contentDescription = null,
+        if (!isLocal) {
+            AsyncImage(
+                model = movieDetails?.poster,
+                contentDescription = null,
+            )
+        }
+        Text(
+            text = if (isLocal) localMovieDetails?.title.toString() else movieDetails?.title.toString()
         )
         Text(
-            text = "Hello ${movieDetails?.title}!"
-        )
-        Text(
-            text = "Hello ${movieDetails?.year}!"
+            text = if (isLocal) localMovieDetails?.year.toString() else movieDetails?.year.toString()
         )
     }
 

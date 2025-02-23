@@ -15,12 +15,4 @@ object MovieResponseDto {
         @SerializedName("Type") var type: String? = null,
         @SerializedName("Poster") var poster: String? = null
     )
-
-    /*data class MovieDetailsResponse(
-        @SerializedName("Title") var title: String? = null,
-        @SerializedName("Year") var year: String? = null,
-        @SerializedName("imdbID") var imdbId: String? = null,
-        @SerializedName("Type") var type: String? = null,
-        @SerializedName("Poster") var poster: String? = null
-    )*/
 }
